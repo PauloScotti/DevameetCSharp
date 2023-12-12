@@ -67,3 +67,4 @@ C:\Users\paulo\projetos_devaria\DevameetCSharp\DevameetCSharp\obj\Debug\net6.0\r
 C:\Users\paulo\projetos_devaria\DevameetCSharp\DevameetCSharp\obj\Debug\net6.0\DevameetCSharp.pdb
 C:\Users\paulo\projetos_devaria\DevameetCSharp\DevameetCSharp\obj\Debug\net6.0\DevameetCSharp.genruntimeconfig.cache
 C:\Users\paulo\projetos_devaria\DevameetCSharp\DevameetCSharp\obj\Debug\net6.0\ref\DevameetCSharp.dll
+C:\Users\paulo\projetos_devaria\DevameetCSharp\DevameetCSharp\obj\Debug\net6.0\DevameetCSharp.sourcelink.json

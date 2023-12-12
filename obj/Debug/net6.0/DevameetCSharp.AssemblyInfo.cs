@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DevameetCSharp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a68e32917fa57a845106111535da9c96bacf3409")]
 [assembly: System.Reflection.AssemblyProductAttribute("DevameetCSharp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DevameetCSharp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

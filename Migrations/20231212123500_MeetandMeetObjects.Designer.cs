@@ -3,6 +3,7 @@ using DevameetCSharp.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DevameetCSharp.Migrations
 {
     [DbContext(typeof(DevameetContext))]
-    partial class DevameetContextModelSnapshot : ModelSnapshot
+    [Migration("20231212123500_MeetandMeetObjects")]
+    partial class MeetandMeetObjects
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -68,9 +70,6 @@ namespace DevameetCSharp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("Walkable")
-                        .HasColumnType("bit");
-
                     b.Property<int>("X")
                         .HasColumnType("int");
 
@@ -85,52 +84,6 @@ namespace DevameetCSharp.Migrations
                     b.HasIndex("MeetId");
 
                     b.ToTable("MeetObjects");
-                });
-
-            modelBuilder.Entity("DevameetCSharp.Models.Room", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("Avatar")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ClientId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("MeetId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("Muted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Orientation")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("X")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Y")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MeetId");
-
-                    b.ToTable("Rooms");
                 });
 
             modelBuilder.Entity("DevameetCSharp.Models.User", b =>
@@ -169,17 +122,6 @@ namespace DevameetCSharp.Migrations
                         .HasForeignKey("MeetId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("DevameetCSharp.Models.Room", b =>
-                {
-                    b.HasOne("DevameetCSharp.Models.Meet", "meet")
-                        .WithMany()
-                        .HasForeignKey("MeetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("meet");
                 });
 
             modelBuilder.Entity("DevameetCSharp.Models.Meet", b =>

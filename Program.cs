@@ -1,5 +1,6 @@
 using System.Text;
 using DevameetCSharp;
+using DevameetCSharp.Hubs;
 using DevameetCSharp.Models;
 using DevameetCSharp.Repository;
 using DevameetCSharp.Repository.Impl;
@@ -20,6 +21,21 @@ var connectString = builder.Configuration.GetConnectionString("DefaultConnection
 builder.Services.AddDbContext<DevameetContext>(option => option.UseSqlServer(connectString));
 
 builder.Services.AddScoped<IUserRepository, UserRepositoryImpl>();
+builder.Services.AddScoped<IMeetRepository, MeetRepositoryImpl>();
+builder.Services.AddScoped<IRoomRepository, RoomRepositoryImpl>();
+builder.Services.AddScoped<IMeetObjectsRepository, MeetObjectsRepositoryImpl>();
+
+builder.Services.AddSignalR();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ClientPermissions", policy =>
+    policy.AllowAnyHeader()
+    .AllowAnyMethod()
+    .WithOrigins("http://localhost:3000")
+    .AllowCredentials()
+    );
+});
 
 var jwtsettings = builder.Configuration.GetRequiredSection("JWT").Get<JWTKey>();
 
@@ -50,6 +66,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("ClientPermissions");
+
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
@@ -57,5 +75,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<RoomHub>("roomHub");
 
 app.Run();

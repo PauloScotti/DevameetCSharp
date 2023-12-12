@@ -3,6 +3,7 @@ using DevameetCSharp.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DevameetCSharp.Migrations
 {
     [DbContext(typeof(DevameetContext))]
-    partial class DevameetContextModelSnapshot : ModelSnapshot
+    [Migration("20231212182705_RoomsMigrations")]
+    partial class RoomsMigrations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -67,9 +69,6 @@ namespace DevameetCSharp.Migrations
                     b.Property<string>("Orientation")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("Walkable")
-                        .HasColumnType("bit");
 
                     b.Property<int>("X")
                         .HasColumnType("int");
