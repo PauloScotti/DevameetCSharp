@@ -2,7 +2,6 @@
 using DevameetCSharp.Models;
 using DevameetCSharp.Repository;
 using DevameetCSharp.Service;
-using DevameetCSharp.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,13 +12,13 @@ namespace DevameetCSharp.Controllers
     {
         private readonly ILogger<AuthController> _logger;
         private readonly IUserRepository _userRepository;
-        private readonly IConfiguration _configuration;
+        private readonly TokenService _tokenService;
 
-        public AuthController(ILogger<AuthController> logger, IUserRepository userRepository, IConfiguration configuration)
+        public AuthController(ILogger<AuthController> logger, IUserRepository userRepository, TokenService tokenService)
         {
             _logger = logger;
             _userRepository = userRepository;
-            _configuration = configuration;
+            _tokenService = tokenService;
         }
 
         [HttpPost]
@@ -32,7 +31,20 @@ namespace DevameetCSharp.Controllers
                 if (!string.IsNullOrEmpty(loginRequestDto.Login) && !string.IsNullOrEmpty(loginRequestDto.Password) 
                     && !string.IsNullOrWhiteSpace(loginRequestDto.Login) && !string.IsNullOrWhiteSpace(loginRequestDto.Password))
                 {
-                    User user = _userRepository.GetUserByLoginPassword(loginRequestDto.Login.ToLower(), MD5Utils.GenerateMD5(loginRequestDto.Password));
+                    // Mesma resposta para e-mail inexistente e senha errada: não revela quais e-mails têm conta.
+                    User? user = _userRepository.GetUserByEmail(loginRequestDto.Login.ToLower());
+                    var (valid, needsRehash) = user == null
+                        ? (false, false)
+                        : PasswordService.Verify(loginRequestDto.Password, user.Password);
+                    if (!valid)
+                    {
+                        user = null;
+                    }
+                    else if (needsRehash)
+                    {
+                        user!.Password = PasswordService.Hash(loginRequestDto.Password);
+                        _userRepository.UpdateUser(user);
+                    }
 
                     if(user != null)
                     {
@@ -40,7 +52,7 @@ namespace DevameetCSharp.Controllers
                         {
                             Email = user.Email,
                             Name = user.Name,
-                            Token = TokenService.CreateToken(user, _configuration["JWT:SecretKey"])
+                            Token = _tokenService.CreateToken(user)
                         });
                     }
                     else
@@ -63,10 +75,10 @@ namespace DevameetCSharp.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError("Ocorreu o seguinte erro no login: " + ex.Message);
+                _logger.LogError(ex, "Ocorreu o seguinte erro no login: ");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponseDto()
                 {
-                    Description = "Ocorreu o seguinte erro no login: " + ex.Message,
+                    Description = "Ocorreu um erro interno",
                     Status = StatusCodes.Status500InternalServerError,
                 });
             }
@@ -91,6 +103,10 @@ namespace DevameetCSharp.Controllers
                     {
                         errors.Add("E-mail inválido");
                     }
+                    if (string.IsNullOrWhiteSpace(userDto.Password) || userDto.Password.Length < 8)
+                    {
+                        errors.Add("A senha precisa ter pelo menos 8 caracteres");
+                    }
                     if(errors.Count > 0)
                     {
 
@@ -110,7 +126,7 @@ namespace DevameetCSharp.Controllers
                     User user = new User()
                     {
                         Email = userDto.Email.ToLower(),
-                        Password = MD5Utils.GenerateMD5(userDto.Password),
+                        Password = PasswordService.Hash(userDto.Password),
                         Name = userDto.Name,
                         Avatar = userDto.Avatar
                     };
@@ -133,10 +149,10 @@ namespace DevameetCSharp.Controllers
                 }
             } catch (Exception ex)
             {
-                _logger.LogError("Ocorreu o seguinte erro: " + ex.Message);
+                _logger.LogError(ex, "Ocorreu o seguinte erro: ");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponseDto()
                 {
-                    Description = "Ocorreu o seguinte erro: " + ex.Message,
+                    Description = "Ocorreu um erro interno",
                     Status = StatusCodes.Status500InternalServerError,
                 });
             }

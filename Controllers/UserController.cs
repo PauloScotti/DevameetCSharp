@@ -32,10 +32,10 @@ namespace DevameetCSharp.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError("Ocorreu o seguinte erro na captura dos dados do usuário: " + ex.Message);
+                _logger.LogError(ex, "Ocorreu o seguinte erro na captura dos dados do usuário: ");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponseDto()
                 {
-                    Description = "Ocorreu o seguinte erro na captura dos dados do usuário: " + ex.Message,
+                    Description = "Ocorreu um erro interno",
                     Status = StatusCodes.Status500InternalServerError,
                 });
             }
@@ -58,10 +58,10 @@ namespace DevameetCSharp.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError("Ocorreu o seguinte erro na captura dos dados do usuário: " + ex.Message);
+                _logger.LogError(ex, "Ocorreu o seguinte erro na captura dos dados do usuário: ");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponseDto()
                 {
-                    Description = "Ocorreu o seguinte erro na captura dos dados do usuário: " + ex.Message,
+                    Description = "Ocorreu um erro interno",
                     Status = StatusCodes.Status500InternalServerError,
                 });
             }
@@ -108,10 +108,10 @@ namespace DevameetCSharp.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError("Ocorreu o seguinte erro na atualização nos dados do usuário: " + ex.Message);
+                _logger.LogError(ex, "Ocorreu o seguinte erro na atualização nos dados do usuário: ");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponseDto()
                 {
-                    Description = "Ocorreu o seguinte erro na atualização nos dados do usuário: " + ex.Message,
+                    Description = "Ocorreu um erro interno",
                     Status = StatusCodes.Status500InternalServerError,
                 });
             }
