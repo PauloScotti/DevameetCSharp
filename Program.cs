@@ -1,19 +1,16 @@
-using System.Text;
-using DevameetCSharp;
 using DevameetCSharp.Hubs;
 using DevameetCSharp.Models;
 using DevameetCSharp.Repository;
 using DevameetCSharp.Repository.Impl;
+using DevameetCSharp.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -24,34 +21,38 @@ builder.Services.AddScoped<IUserRepository, UserRepositoryImpl>();
 builder.Services.AddScoped<IMeetRepository, MeetRepositoryImpl>();
 builder.Services.AddScoped<IRoomRepository, RoomRepositoryImpl>();
 builder.Services.AddScoped<IMeetObjectsRepository, MeetObjectsRepositoryImpl>();
+builder.Services.AddSingleton<TokenService>();
 
 builder.Services.AddSignalR();
 
+// Origens do front em Cors:Origins (o SignalR exige origem explícita com credenciais).
+var origins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>() ?? Array.Empty<string>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("ClientPermissions", policy =>
     policy.AllowAnyHeader()
     .AllowAnyMethod()
-    .WithOrigins("http://localhost:3000")
+    .WithOrigins(origins)
     .AllowCredentials()
     );
 });
 
-var jwtsettings = builder.Configuration.GetRequiredSection("JWT").Get<JWTKey>();
-
-var secretkey = Encoding.ASCII.GetBytes(jwtsettings.SecretKey);
+// Falha na subida, e não na primeira requisição, se a chave não estiver configurada.
+var secretkey = TokenService.ReadKey(builder.Configuration);
 builder.Services.AddAuthentication(auth =>
 {
     auth.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     auth.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(authentication =>
 {
-    authentication.RequireHttpsMetadata = false;
     authentication.SaveToken = true;
     authentication.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(secretkey),
+        ValidAlgorithms = new[] { SecurityAlgorithms.HmacSha256 },
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.FromMinutes(1),
         ValidateIssuer = false,
         ValidateAudience = false,
     };
@@ -59,19 +60,18 @@ builder.Services.AddAuthentication(auth =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// Swagger UI em /swagger e referência Scalar em /scalar.
+app.UseSwagger();
+app.UseSwaggerUI();
+app.MapScalarApiReference(options => options
+    .WithTitle("Devameet API")
+    .WithOpenApiRoutePattern("/swagger/{documentName}/swagger.json"));
 
 app.UseCors("ClientPermissions");
 
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
-
 app.UseAuthorization();
 
 app.MapControllers();

@@ -34,10 +34,10 @@ namespace DevameetCSharp.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError("Ocorreu o seguinte erro na busca das salas de reunião: " + ex.Message);
+                _logger.LogError(ex, "Ocorreu o seguinte erro na busca das salas de reunião: ");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponseDto()
                 {
-                    Description = "Ocorreu o seguinte erro na busca das salas de reunião: " + ex.Message,
+                    Description = "Ocorreu um erro interno",
                     Status = StatusCodes.Status500InternalServerError,
                 });
             }
@@ -53,10 +53,10 @@ namespace DevameetCSharp.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError("Ocorreu o seguinte erro na busca dos objetos da sala de reunião: " + ex.Message);
+                _logger.LogError(ex, "Ocorreu o seguinte erro na busca dos objetos da sala de reunião: ");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponseDto()
                 {
-                    Description = "Ocorreu o seguinte erro na busca dos objetos da sala de reunião: " + ex.Message,
+                    Description = "Ocorreu um erro interno",
                     Status = StatusCodes.Status500InternalServerError,
                 });
             }
@@ -91,10 +91,10 @@ namespace DevameetCSharp.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError("Ocorreu o seguinte erro ao salvar a sala de reunião: " + ex.Message);
+                _logger.LogError(ex, "Ocorreu o seguinte erro ao salvar a sala de reunião: ");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponseDto()
                 {
-                    Description = "Ocorreu o seguinte erro ao salvar a sala de reunião: " + ex.Message,
+                    Description = "Ocorreu um erro interno",
                     Status = StatusCodes.Status500InternalServerError,
                 });
             }
@@ -106,6 +106,15 @@ namespace DevameetCSharp.Controllers
             try
             {
                 Meet meet = _meetRepository.GetMeetById(meetId);
+                // Só o dono altera a sala; a de outra pessoa responde como não encontrada.
+                if (meet == null || meet.UserId != GetToken().Id)
+                {
+                    return NotFound(new ErrorResponseDto()
+                    {
+                        Description = "Sala de reunião não encontrada",
+                        Status = StatusCodes.Status404NotFound,
+                    });
+                }
                 meet.Name = meetUpdateRequestDto.Name;
                 meet.Color = meetUpdateRequestDto.Color;
                 _meetRepository.UpdateMeet(meet);
@@ -130,10 +139,10 @@ namespace DevameetCSharp.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError("Ocorreu o seguinte erro ao atualizar a sala de reunião: " + ex.Message);
+                _logger.LogError(ex, "Ocorreu o seguinte erro ao atualizar a sala de reunião: ");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponseDto()
                 {
-                    Description = "Ocorreu o seguinte erro ao atualizar a sala de reunião: " + ex.Message,
+                    Description = "Ocorreu um erro interno",
                     Status = StatusCodes.Status500InternalServerError,
                 });
             }
@@ -144,15 +153,24 @@ namespace DevameetCSharp.Controllers
         {
             try
             {
+                Meet meet = _meetRepository.GetMeetById(meetId);
+                if (meet == null || meet.UserId != GetToken().Id)
+                {
+                    return NotFound(new ErrorResponseDto()
+                    {
+                        Description = "Sala de reunião não encontrada",
+                        Status = StatusCodes.Status404NotFound,
+                    });
+                }
                 _meetRepository.DeleteMeet(meetId);
                 return Ok("Sala de reunião excluída com sucesso!");
             }
             catch (Exception ex)
             {
-                _logger.LogError("Ocorreu o seguinte erro ao excluir a sala de reunião: " + ex.Message);
+                _logger.LogError(ex, "Ocorreu o seguinte erro ao excluir a sala de reunião: ");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponseDto()
                 {
-                    Description = "Ocorreu o seguinte erro ao excluir a sala de reunião: " + ex.Message,
+                    Description = "Ocorreu um erro interno",
                     Status = StatusCodes.Status500InternalServerError,
                 });
             }

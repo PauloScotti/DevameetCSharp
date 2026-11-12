@@ -4,7 +4,7 @@ namespace DevameetCSharp.Repository
 {
     public interface IUserRepository
     {
-        User GetUserByLoginPassword(string login, string password);
+        User? GetUserByEmail(string email);
         User GetUserByLogin(int iduser);
         void Save(User user);
         bool VerifyEmail (string email);
